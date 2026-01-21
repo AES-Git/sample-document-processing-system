@@ -1,0 +1,36 @@
+{
+  "Settings": {
+    "EnableRazorViews": false,
+    "ExcludePortNetStandard": false,
+    "EnableDbMod": true
+  },
+  "DatabaseSettings": {
+    "ConnecterId": "cbd5691d-aa33-44d1-bf60-bd679bb77008",
+    "Databases": [
+      {
+        "Source": {
+          "DatabaseName": "DPS",
+          "DatabaseVersion": 2019
+        },
+        "Target": {
+          "DatabaseName": "DPS",
+          "DatabaseVersion": 13
+        },
+        "Tools": [
+          {
+            "Name": "DMS",
+            "Properties": {
+              "DmsArn": "arn:aws:dms:us-east-1:774258447825:migration-project:GX2M3NFZIZBK3FDZS2FKDUY6UY"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "projects": [
+    {
+      "projectFilePath": "src/DocumentProcessor.Web/DocumentProcessor.Web.csproj",
+      "dependencies": []
+    }
+  ]
+}

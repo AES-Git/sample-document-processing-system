@@ -1,7 +1,8 @@
-using DocumentProcessor.Web.Components;
+﻿using DocumentProcessor.Web.Components;
 using DocumentProcessor.Web.Data;
 using DocumentProcessor.Web.Services;
 using Microsoft.EntityFrameworkCore;
+using Npgsql.EntityFrameworkCore.PostgreSQL;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,16 +19,16 @@ try
     // First: Try to get secret with "target" in name (Postgres)
     try
     {
-        secretJson = await secretsService.GetSecretAsync("atx-db-modernization-atx-db-modernization-1-target");
+        secretJson = await secretsService.GetSecretAsync("arn:aws:secretsmanager:us-east-1:774258447825:secret:atx-db-modernization-secret-aurora-admin-y1XOVa");
         if (!string.IsNullOrWhiteSpace(secretJson))
         {
             var username = secretsService.GetFieldFromSecret(secretJson, "username");
             var password = secretsService.GetFieldFromSecret(secretJson, "password");
             var host = secretsService.GetFieldFromSecret(secretJson, "host");
             var port = secretsService.GetFieldFromSecret(secretJson, "port");
-            var dbname = "postgres";
+            var dbname = "DPS";
             connectionString = $"Host={host};Port={port};Database={dbname};Username={username};Password={password};SSL Mode=Require;Trust Server Certificate=true";
-            dbInfo.DatabaseType = "PostgreSQL"; dbInfo.SecretName = "atx-db-modernization-atx-db-modernization-1-target"; dbInfo.HostAddress = $"{host}:{port}";
+            dbInfo.DatabaseType = "PostgreSQL"; dbInfo.SecretName = "arn:aws:secretsmanager:us-east-1:774258447825:secret:atx-db-modernization-secret-aurora-admin-y1XOVa"; dbInfo.HostAddress = $"{host}:{port}";
         }
         else throw new Exception("Secret was empty");
     }
@@ -52,11 +53,11 @@ catch (Exception ex)
 {
     Console.WriteLine($"Warning: Could not load connection string from AWS Secrets Manager: {ex.Message}");
     Console.WriteLine("Falling back to appsettings.json connection string");
-    connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? "Server=localhost;Database=DocumentProcessor;Integrated Security=true;TrustServerCertificate=True;";
-    dbInfo.DatabaseType = "SQL Server (Local)"; dbInfo.SecretName = "appsettings.json"; dbInfo.HostAddress = "localhost";
+    connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? "Host=localhost;Database=DocumentProcessor;Username=postgres;Password=postgres;";
+    dbInfo.DatabaseType = "PostgreSQL (Local)"; dbInfo.SecretName = "appsettings.json"; dbInfo.HostAddress = "localhost";
 }
 
-builder.Services.AddDbContext<AppDbContext>(o => o.UseSqlServer(connectionString));
+builder.Services.AddDbContext<AppDbContext>(o => o.UseNpgsql(connectionString));
 builder.Services.AddSingleton(dbInfo);
 builder.Services.AddScoped<FileStorageService>();
 builder.Services.AddScoped<AIService>();
